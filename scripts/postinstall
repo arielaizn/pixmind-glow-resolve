@@ -1,0 +1,21 @@
+#!/bin/bash
+# Copies the Resolve scripts, PixMind Glow titles, macro and font into the
+# logged-in user's home, so Resolve sees them after a restart.
+ROOT="/Library/Application Support/pixmind-resolve-hebrew-auto-captions"
+CONSOLE_USER="$(stat -f%Su /dev/console)"
+if [ -z "$CONSOLE_USER" ] || [ "$CONSOLE_USER" = "root" ]; then CONSOLE_USER="$USER"; fi
+USER_HOME="$(dscl . -read "/Users/$CONSOLE_USER" NFSHomeDirectory 2>/dev/null | awk '{print $2}')"
+[ -d "$USER_HOME" ] || exit 0
+
+FUSION="$USER_HOME/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion"
+mkdir -p "$FUSION/Scripts/Edit" "$FUSION/Templates/Edit/Titles/PixMind Glow" "$FUSION/Macros" "$USER_HOME/Library/Fonts"
+
+cp -f "$ROOT/resolve/"*.py "$FUSION/Scripts/Edit/"
+cp -f "$ROOT/templates/Edit/Titles/PixMind Glow/"*.setting "$FUSION/Templates/Edit/Titles/PixMind Glow/"
+cp -f "$ROOT/macros/"*.setting "$FUSION/Macros/"
+cp -f "$ROOT/fonts/"*.ttf "$USER_HOME/Library/Fonts/"
+
+chown -R "$CONSOLE_USER" "$FUSION/Scripts/Edit" "$FUSION/Templates/Edit/Titles/PixMind Glow" \
+  "$FUSION/Macros/PixMind Glow - Custom Color.setting" \
+  "$USER_HOME/Library/Fonts/PixMindGlowHebrew-Regular.ttf" 2>/dev/null
+exit 0
